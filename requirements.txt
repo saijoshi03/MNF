@@ -1,2 +1,3 @@
 # requirements.txt
-Flask
+Flask>=2.0
+gunicorn
