@@ -1,47 +1,30 @@
-import os
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-def add(x, y): return x + y
-def subtract(x, y): return x - y
-def multiply(x, y): return x * y
-def divide(x, y): return x / y if y != 0 else "Cannot divide by zero"
-
-@app.route("/calculate", methods=["POST"])
+@app.route('/calculate', methods=['GET'])
 def calculate():
-    data = request.get_json()
-    operation = data.get("operation")
-    x = data.get("x")
-    y = data.get("y")
-
-    if None in (operation, x, y):
-        return jsonify({"error": "Missing data"}), 400
-
     try:
-        x = float(x)
-        y = float(y)
-    except ValueError:
-        return jsonify({"error": "Inputs must be numbers"}), 400
+        num1 = float(request.args.get('num1'))
+        num2 = float(request.args.get('num2'))
+        op = request.args.get('op')
 
-    result = None
-    if operation == "add":
-        result = add(x, y)
-    elif operation == "subtract":
-        result = subtract(x, y)
-    elif operation == "multiply":
-        result = multiply(x, y)
-    elif operation == "divide":
-        result = divide(x, y)
-    else:
-        return jsonify({"error": "Invalid operation"}), 400
+        if op == 'add':
+            result = num1 + num2
+        elif op == 'subtract':
+            result = num1 - num2
+        elif op == 'multiply':
+            result = num1 * num2
+        elif op == 'divide':
+            if num2 == 0:
+                return jsonify({'error': 'Division by zero'}), 400
+            result = num1 / num2
+        else:
+            return jsonify({'error': 'Invalid operation'}), 400
 
-    return jsonify({"result": result})
+        return jsonify({'result': result})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
 
-@app.route("/")
-def index():
-    return "Calculator API is running!"
-if __name__ == "__main__":
-    # Get the port from the environment, default to 8080 if not set
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", port=port)
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=10000)
