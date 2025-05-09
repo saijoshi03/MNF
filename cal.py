@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -40,6 +41,7 @@ def calculate():
 @app.route("/")
 def index():
     return "Calculator API is running!"
-
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5555)
+    # Get the port from the environment, default to 8080 if not set
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
