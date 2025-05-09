@@ -1,55 +1,45 @@
-# This function adds two numbers
-def add(x, y):
-    return x + y
+from flask import Flask, request, jsonify
 
-# This function subtracts two numbers
-def subtract(x, y):
-    return x - y
+app = Flask(__name__)
 
-# This function multiplies two numbers
-def multiply(x, y):
-    return x * y
+def add(x, y): return x + y
+def subtract(x, y): return x - y
+def multiply(x, y): return x * y
+def divide(x, y): return x / y if y != 0 else "Cannot divide by zero"
 
-# This function divides two numbers
-def divide(x, y):
-    return x / y
+@app.route("/calculate", methods=["POST"])
+def calculate():
+    data = request.get_json()
+    operation = data.get("operation")
+    x = data.get("x")
+    y = data.get("y")
 
+    if None in (operation, x, y):
+        return jsonify({"error": "Missing data"}), 400
 
-print("Select operation.")
-print("1.Add")
-print("2.Subtract")
-print("3.Multiply")
-print("4.Divide")
+    try:
+        x = float(x)
+        y = float(y)
+    except ValueError:
+        return jsonify({"error": "Inputs must be numbers"}), 400
 
-while True:
-    # take input from the user
-    choice = input("Enter choice(1/2/3/4): ")
-
-    # check if choice is one of the four options
-    if choice in ('1', '2', '3', '4'):
-        try:
-            num1 = float(input("Enter first number: "))
-            num2 = float(input("Enter second number: "))
-        except ValueError:
-            print("Invalid input. Please enter a number.")
-            continue
-
-        if choice == '1':
-            print(num1, "+", num2, "=", add(num1, num2))
-
-        elif choice == '2':
-            print(num1, "-", num2, "=", subtract(num1, num2))
-
-        elif choice == '3':
-            print(num1, "*", num2, "=", multiply(num1, num2))
-
-        elif choice == '4':
-            print(num1, "/", num2, "=", divide(num1, num2))
-        
-        # check if user wants another calculation
-        # break the while loop if answer is no
-        next_calculation = input("Let's do next calculation? (yes/no): ")
-        if next_calculation == "no":
-          break
+    result = None
+    if operation == "add":
+        result = add(x, y)
+    elif operation == "subtract":
+        result = subtract(x, y)
+    elif operation == "multiply":
+        result = multiply(x, y)
+    elif operation == "divide":
+        result = divide(x, y)
     else:
-        print("Invalid Input")
+        return jsonify({"error": "Invalid operation"}), 400
+
+    return jsonify({"result": result})
+
+@app.route("/")
+def index():
+    return "Calculator API is running!"
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)
